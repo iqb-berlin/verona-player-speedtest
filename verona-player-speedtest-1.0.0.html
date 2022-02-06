@@ -58,19 +58,8 @@
       text-align: center;
     }
 
-    #shield {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 51000
-    }
-
     #buttons {
-        margin-top: 1em;
+        margin-top: 2em;
     }
 
     #buttons label:first-of-type {
@@ -92,7 +81,7 @@
     }
 
     #buttons [type="radio"]:checked ~ .button {
-        background-color: darkgray;
+        background-color: #656565;
     }
 
     #text {
@@ -102,18 +91,16 @@
 </head>
 <body>
 
-<div id="shield"></div>
-
 <div>
-  <span id="text"></span>
+  <span id="text">Ein Satz</span>
   <form id="buttons">
     <label>
       <input type="radio" name="main" value="A">
-      <span class="button">Falsch</span>
+      <span class="button">richtig</span>
     </label>
     <label>
       <input type="radio" name="main" value="B">
-      <span class="button">Richtig</span>
+      <span class="button">falsch</span>
     </label>
   </form>
 </div>
@@ -129,7 +116,6 @@
   const Message = new class {
     send = new class {
       vopStateChangedNotification = () => {
-        console.log({DATA: Player.getData()});
         this._send({
           type: 'vopStateChangedNotification',
           sessionId: sessionId,
@@ -177,7 +163,6 @@
       };
 
       _send = msg => {
-        console.log(msg);
         window.parent.postMessage(msg, '*');
       }
     }
