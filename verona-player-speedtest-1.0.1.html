@@ -173,6 +173,7 @@
       }
       if (type === "vopStartCommand") {
         Player.start(data);
+        Message.send.vopStateChangedNotification();
       }
     };
   }
@@ -197,7 +198,6 @@
     setUnitData = unitState => {
       if (unitState.dataParts.main) {
         const main = JSON.parse(unitState.dataParts.main);
-        console.log(main);
         document.querySelector(`[value="${main[0].value}"]`).checked = true;
       }
     }
