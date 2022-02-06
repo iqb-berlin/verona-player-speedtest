@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Booklet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/iqb-berlin/testcenter-backend/12.0.0/definitions/vo_Booklet.xsd">
+  <Metadata>
+    <Id>speedtest_booklet</Id>
+    <Label>Speedtest Booklet</Label>
+    <Description>Speedtest Booklet</Description>
+  </Metadata>
+
+  <BookletConfig>
+    <Config key="page_navibuttons">OFF</Config>
+    <Config key="unit_navibuttons">OFF</Config>
+    <Config key="unit_show_time_left">ON</Config>
+  </BookletConfig>
+
+  <Units>
+    <Testlet id="timed_block" label="Speedtest">
+      <Restrictions>
+        <TimeMax minutes="2"/>
+      </Restrictions>
+      <Unit id="unit-0" label="unit-0" labelshort="unit-0" />
+			<Unit id="unit-1" label="unit-1" labelshort="unit-1" />
+			<Unit id="unit-2" label="unit-2" labelshort="unit-2" />
+			<Unit id="unit-3" label="unit-3" labelshort="unit-3" />
+			<Unit id="unit-4" label="unit-4" labelshort="unit-4" />
+			<Unit id="unit-5" label="unit-5" labelshort="unit-5" />
+			<Unit id="unit-6" label="unit-6" labelshort="unit-6" />
+			<Unit id="unit-7" label="unit-7" labelshort="unit-7" />
+			<Unit id="unit-8" label="unit-8" labelshort="unit-8" />
+			<Unit id="unit-9" label="unit-9" labelshort="unit-9" />
+			<Unit id="unit-10" label="unit-10" labelshort="unit-10" />
+			<Unit id="unit-11" label="unit-11" labelshort="unit-11" />
+			<Unit id="unit-12" label="unit-12" labelshort="unit-12" />
+			<Unit id="unit-13" label="unit-13" labelshort="unit-13" />
+			<Unit id="unit-14" label="unit-14" labelshort="unit-14" />
+			<Unit id="unit-15" label="unit-15" labelshort="unit-15" />
+			<Unit id="unit-16" label="unit-16" labelshort="unit-16" />
+			<Unit id="unit-17" label="unit-17" labelshort="unit-17" />
+			<Unit id="unit-18" label="unit-18" labelshort="unit-18" />
+			<Unit id="unit-19" label="unit-19" labelshort="unit-19" />
+    </Testlet>
+  </Units>
+</Booklet>

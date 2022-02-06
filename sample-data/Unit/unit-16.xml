@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<Unit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/iqb-berlin/testcenter-backend/12.0.0/definitions/vo_Unit.xsd">
+  <Metadata>
+    <Id>unit-16</Id>
+    <Label>unit-16</Label>
+    <Description>unit-16</Description>
+  </Metadata>
+
+  <Definition player="verona-player-speedtest-1.0.0">Gurren auf dem Dach</Definition>
+</Unit>

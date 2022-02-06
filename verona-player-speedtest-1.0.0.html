@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verona Player Speedtest</title>
+
+  <!--  Verona4-metadata is not supported by current Teststudio-Lite (January 22), so we must use the Verona3-way
+  of doing it -->
+
+  <meta
+    name="application-name"
+    content="iqb-player-speedtest"
+    data-version="1.0.0"
+    data-repository-url="..."
+    data-api-version="4.0.0"
+    data-not-supported-api-features="stop-continue log-policy paging-mode variable-data report-on-demand"
+  />
+
+  <!--  to activate verona4-metadata, add type="application/ld+json" -->
+  <script id="verona4-metadata" type="application/json">
+    {
+      "$schema": "https://raw.githubusercontent.com/verona-interfaces/metadata/master/verona-module-metadata.json",
+      "type": "editor",
+      "id": "speedtest",
+      "name": [
+        {
+          "value": "Speed-Test-Player",
+          "lang": "en"
+        }
+      ],
+      "description": [
+          {
+              "value": "The Speedtest-pLayer is a (micro-) [Verona-player](https://github.com/verona-interfaces/player) for reading speed tests. It's units are just strings - mostly simple sentences. The player shows the sentence and two buttons, 'Richtig' and 'Falsch'. Clicking them button submits data (`A` or `B`) and provokes the host to proceed to the next item. It is developed in behalf of the Institut für Bildungsanalysen Baden-Württemberg (IBBW).",
+              "lang": "en"
+          }
+      ],
+      "version": "0.0.1",
+      "specVersion": "4.0",
+      "notSupportedFeatures": [
+        "stop-continue",
+        "log-policy",
+        "paging-mode",
+        "variable-data",
+        "report-on-demand"
+      ]
+    }
+  </script>
+
+  <style>
+    html, body {
+      height: 100vh;
+      overflow: hidden;
+      font-family: sans-serif;
+      margin: 1em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    #shield {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 51000
+    }
+
+    #buttons {
+        margin-top: 1em;
+    }
+
+    #buttons label:first-of-type {
+        margin-right: 1em;
+    }
+
+    #buttons .button {
+        display: inline-block;
+        background: lightgray;
+        border: 1px solid darkgray;
+        border-radius: 3px;
+        font-size: 16pt;
+        padding: 0.3em 1em;
+        cursor: pointer
+    }
+
+    #buttons [type="radio"] {
+        display: none;
+    }
+
+    #buttons [type="radio"]:checked ~ .button {
+        background-color: darkgray;
+    }
+
+    #text {
+        font-size: 22pt;
+    }
+  </style>
+</head>
+<body>
+
+<div id="shield"></div>
+
+<div>
+  <span id="text"></span>
+  <form id="buttons">
+    <label>
+      <input type="radio" name="main" value="A">
+      <span class="button">Falsch</span>
+    </label>
+    <label>
+      <input type="radio" name="main" value="B">
+      <span class="button">Richtig</span>
+    </label>
+  </form>
+</div>
+
+
+
+<script>
+
+  let sessionId = '';
+
+  const playerMetaData = JSON.parse(document.querySelector('#verona4-metadata').innerText)
+
+  const Message = new class {
+    send = new class {
+      vopStateChangedNotification = () => {
+        console.log({DATA: Player.getData()});
+        this._send({
+          type: 'vopStateChangedNotification',
+          sessionId: sessionId,
+          timeStamp: Date.now(),
+          playerState: {
+            state: 'running',
+            validPages: {}
+          },
+          unitState: {
+            dataParts: {
+              main: Player.getData()
+            },
+            unitStateDataType: 'iqb-standard@1.0',
+            presentationProgress: 'complete',
+            responseProgress: Player.getData() ? 'complete' : 'none'
+          }
+        });
+      };
+
+      vopReadyNotification = () => {
+        setTimeout(
+          () => this._send({
+            type: 'vopReadyNotification',
+            metadata: playerMetaData,
+            apiVersion: "4" // to be backwards-compatible with the Teststudio-lite as of January 22
+          }),
+          1
+        )
+      };
+
+      vopWindowFocusChangedNotification = hasFocus => {
+        this._send({
+          type: 'vopWindowFocusChangedNotification',
+          sessionId: sessionId,
+          hasFocus: hasFocus
+        });
+      }
+
+      vopUnitNavigationRequestedNotification = target => {
+        this._send({
+          type: 'vopUnitNavigationRequestedNotification',
+          sessionId: sessionId,
+          target: target,
+        });
+      };
+
+      _send = msg => {
+        console.log(msg);
+        window.parent.postMessage(msg, '*');
+      }
+    }
+
+    receive = (type, data) => {
+      if (sessionId && (data.sessionId !== sessionId)) {
+        throw new Error("Wrong sessionId " + type);
+      }
+      if (type === "vopStartCommand") {
+        Player.start(data);
+      }
+    };
+  }
+
+  const Player = new class {
+
+    start = data => {
+      sessionId = data.sessionId || new Error("session ID missing");
+      this.setUnit(data["unitDefinition"] || new Error("unitDefinition missing"));
+      this.setUnitData(data["unitState"] || {});
+    }
+
+    getData = () => {
+      const formData = new FormData(document.querySelector("form"))
+      return JSON.stringify([{ "id": "speedtest", "value": formData.get('main') }]);
+    }
+
+    setUnit = text => {
+      document.getElementById('text').innerText = text;
+    }
+
+    setUnitData = unitState => {
+      if (unitState.dataParts.main) {
+        const main = JSON.parse(unitState.dataParts.main);
+        console.log(main);
+        document.querySelector(`[value="${main[0].value}"]`).checked = true;
+      }
+    }
+
+    addEventListener = (eventName, selector, listener) => {
+      document.querySelector('body').addEventListener(eventName, event => {
+        if (event.target.matches(selector)) {
+          listener(event);
+        }
+      });
+    }
+  }
+
+  window.addEventListener('message', event => {Message.receive(event.data.type, event.data)}, false);
+
+  document.addEventListener("DOMContentLoaded", Message.send.vopReadyNotification);
+
+  window.addEventListener('blur', () => {
+    Message.send.vopWindowFocusChangedNotification(document.hasFocus());
+  });
+
+  window.addEventListener('focus', () => {
+    Message.send.vopWindowFocusChangedNotification(document.hasFocus());
+  });
+
+  Player.addEventListener('click', 'input', () => {
+    Message.send.vopStateChangedNotification();
+    Message.send.vopUnitNavigationRequestedNotification('next');
+  });
+</script>
+
+</body>
+</html>
