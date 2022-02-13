@@ -16,7 +16,7 @@ if (testConfig.headless) {
   options.addArguments('-headless');
 }
 
-const playerPath = `${__dirname}/../verona-player-speedtest-1.0.0.html`;
+const playerPath = `${__dirname}/../verona-player-speedtest-1.0.2.html`;
 
 const send = async message => {
   await driver.executeScript(`window.postMessage(${JSON.stringify(message)}, '*');`);
@@ -124,6 +124,36 @@ describe('speedtest player', () => {
       type: 'vopUnitNavigationRequestedNotification',
       sessionId: '1',
       target: 'next'
+    });
+  });
+
+  it('should send the correct state after loading', async () => {
+
+    await MessageRecorder.recordMessages(driver);
+
+    await send({
+      type: 'vopStartCommand',
+      unitDefinition: 'Dies ist ein Beispielsatz!',
+      sessionId: '1',
+      unitState: {
+      }
+    });
+
+
+    const message1 = await MessageRecorder.getLastMessage(driver, 'vopStateChangedNotification');
+    delete message1.timeStamp;
+    expect(message1).toEqual({
+      type: 'vopStateChangedNotification',
+      sessionId: '1',
+      playerState: {
+        state: 'running',
+        validPages: {}
+      },
+      unitState: {
+        presentationProgress: 'complete',
+        responseProgress: 'none',
+        unitStateDataType: 'iqb-standard@1.0'
+      }
     });
   });
 });

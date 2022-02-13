@@ -116,7 +116,8 @@
   const Message = new class {
     send = new class {
       vopStateChangedNotification = () => {
-        this._send({
+        const data = Player.getData();
+        const msg = {
           type: 'vopStateChangedNotification',
           sessionId: sessionId,
           timeStamp: Date.now(),
@@ -125,14 +126,17 @@
             validPages: {}
           },
           unitState: {
-            dataParts: {
-              main: Player.getData()
-            },
             unitStateDataType: 'iqb-standard@1.0',
             presentationProgress: 'complete',
-            responseProgress: Player.getData() ? 'complete' : 'none'
+            responseProgress: data ? 'complete' : 'none'
           }
-        });
+        }
+        if (data) {
+          msg.unitState.dataParts = {
+            main: Player.getData()
+          };
+        }
+        this._send(msg);
       };
 
       vopReadyNotification = () => {
@@ -188,7 +192,11 @@
 
     getData = () => {
       const formData = new FormData(document.querySelector("form"))
-      return JSON.stringify([{ "id": "speedtest", "value": formData.get('main') }]);
+      const value = formData.get('main');
+      if (!value) {
+        return null;
+      }
+      return JSON.stringify([{ id: "speedtest", value }]);
     }
 
     setUnit = text => {
@@ -196,7 +204,7 @@
     }
 
     setUnitData = unitState => {
-      if (unitState.dataParts.main) {
+      if (unitState.dataParts?.main) {
         const main = JSON.parse(unitState.dataParts.main);
         document.querySelector(`[value="${main[0].value}"]`).checked = true;
       }

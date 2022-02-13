@@ -1,6 +1,6 @@
 {
   "name": "verona-player-speedtest",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A dependency-free, vanilla-js Verona3-Player which can run HTML-forms as Units. NPM and stuff is only needed for testing purpose.",
   "dependencies": {},
   "devDependencies": {
