@@ -2,7 +2,7 @@
 
 The Speedtest-pLayer is a (micro-) [Verona-player](https://github.com/verona-interfaces/player) for reading speed tests.
 It's units are just strings - mostly simple sentences. The player shows the sentence and two buttons, 
-"Richtig" and "Falsch". Clicking the button submits data (`A` or `B`) and provokes the host to proceed to the 
+"JA" and "NEIN". Clicking the button submits data (`A` or `B`) and provokes the host to proceed to the 
 next item. The response-data is given in the [IQB-standard-format](https://github.com/iqb-berlin/verona-data-specifications/blob/main/responses/manual_iqb-standard.md). 
 
 It is developed in behalf of the Institut für Bildungsanalysen Baden-Württemberg (IBBW).
