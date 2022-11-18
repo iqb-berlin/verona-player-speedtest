@@ -2,47 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Verona Player Speedtest</title>
+  <title>Verona Player Speed-Test</title>
 
-  <!--  Verona4-metadata is not supported by current Teststudio-Lite (January 22), so we must use the Verona3-way
-  of doing it -->
-
-  <meta
-    name="application-name"
-    content="iqb-player-speedtest"
-    data-version="1.0.1"
-    data-repository-url="..."
-    data-api-version="4.0.0"
-    data-not-supported-api-features="stop-continue log-policy paging-mode variable-data report-on-demand"
-  />
-
-  <!--  to activate verona4-metadata, add type="application/ld+json" -->
-  <script id="verona4-metadata" type="application/json">
+  <script id="verona-metadata" type="application/json+ld">
     {
       "$schema": "https://raw.githubusercontent.com/verona-interfaces/metadata/master/verona-module-metadata.json",
-      "type": "editor",
       "id": "speedtest",
+      "version": "1.0.4",
+      "specVersion": "5.0",
+      "metadataVersion": "2.0",
+      "type": "player",
       "name": [
         {
-          "value": "Speed-Test-Player",
-          "lang": "en"
+          "lang": "en",
+          "value": "Speed-Test-Player"
+        },
+        {
+          "lang": "de",
+          "value": "Speed-Test-Player"
         }
       ],
       "description": [
-          {
-              "value": "The Speedtest-pLayer is a (micro-) [Verona-player](https://github.com/verona-interfaces/player) for reading speed tests. It's units are just strings - mostly simple sentences. The player shows the sentence and two buttons, 'Richtig' and 'Falsch'. Clicking them button submits data (`A` or `B`) and provokes the host to proceed to the next item. It is developed in behalf of the Institut für Bildungsanalysen Baden-Württemberg (IBBW).",
-              "lang": "en"
-          }
+        {
+          "lang": "de",
+          "value": "The Speed-Test-Player is a Verona-player for reading speed tests. It's units are just strings - mostly simple sentences. The player shows the sentence and two buttons. Clicking one button submits response data (for first button `A` or for second button `B`) and requests the host to navigate to the next unit/page."
+        }
       ],
-      "version": "1.0.1",
-      "specVersion": "4.0",
       "notSupportedFeatures": [
-        "stop-continue",
         "log-policy",
         "paging-mode",
-        "variable-data",
-        "report-on-demand"
-      ]
+        "variable-data"
+      ],
+      "maintainer": {
+        "name": [
+          {
+            "lang": "en",
+            "value": "IQB - Institute for Educational Quality Improvement. It has been developed in behalf of the Institut für Bildungsanalysen Baden-Württemberg (IBBW)."
+          },
+          {
+            "lang": "de",
+            "value": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen. Der Player wurde ursprünglich im Auftrag des Instituts für Bildungsanalysen Baden-Württemberg entwickelt."
+          }
+        ],
+        "url": "https://www.iqb.hu-berlin.de",
+        "email": "iqb-tbadev@hu-berlin.de"
+      },
+      "code": {
+        "repositoryType": "git",
+        "licenseType": "MIT",
+        "licenseUrl": "https://opensource.org/licenses/MIT",
+        "repositoryUrl": "https://github.com/iqb-berlin/verona-player-speedtest"
+      }
     }
   </script>
 
@@ -111,7 +121,7 @@
 
   let sessionId = '';
 
-  const playerMetaData = JSON.parse(document.querySelector('#verona4-metadata').innerText)
+  const playerMetaData = JSON.parse(document.querySelector('#verona-metadata').innerText)
 
   const Message = new class {
     send = new class {
