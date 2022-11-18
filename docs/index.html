@@ -7,6 +7,7 @@
   <style>
     body {
       font-family: Arial, Helvetica, sans-serif;
+      padding: 10px;
     }
     textarea {
       width: 100%;
@@ -18,10 +19,11 @@
   <h1>Create Unit Data for IQB-Testcenter</h1>
   <p>This is a tool to create units for the Speedtest-Player. Every line in text below will create one separate unit xml file.</p>
   <p>Furthermore, one booklet file will be created. All units will be listed in one testlet. This testlet will have a time limit for responding.</p>
-  <p>All files will be put into one zip file to download when you click the button. Add the player html (see [last release](https://github.com/iqb-berlin/verona-player-speedtest/releases/latest)) and a testtaker xml and you are ready to run the test.</p>
-  Each line will be a unit:
-  <label>
-    <textarea style="width: 100%">
+  <p>All files will be put into one zip file to download when you click the button. Add the player html (see <a href="https://github.com/iqb-berlin/verona-player-speedtest/releases/latest">last release</a>) and a testtaker xml and you are ready to run the test.</p>
+  <div style="flex-direction: row; align-items: start;">
+    <div style="flex: 1">
+      <h3>Each line will be a separate unit:</h3>
+        <textarea style="width: 100%">
 Alle meine Entchen
 Schwimmen auf dem See
 Schwimmen auf dem See
@@ -42,10 +44,19 @@ Gurren auf dem Dach
 Gurren auf dem Dach
 Fliegt eins in die Lüfte
 Fliegen alle nach.
-</textarea>
-  </label>
+      </textarea>
+    </div>
+    <div style="flex: 1; flex-direction: column; align-items: stretch;">
+      <h3>Parameters:</h3>
+      <div style="flex-direction: row;">
+        <div style="flex: 50px;">Version of the player</div>
+        <input id="player_version" type="text">
+      </div>
+    </div>
+  </div>
   <button id="ok">Download Booklet</button>
   <script>
+    let playerVersion = "1.1.0";
     const unitTemplate = (text, id) =>
 `<?xml version="1.0"?>
 <Unit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/iqb-berlin/testcenter/13.0.0/definitions/vo_Unit.xsd">
@@ -55,7 +66,7 @@ Fliegen alle nach.
     <Description>unit-${id}</Description>
   </Metadata>
 
-  <Definition player="verona-player-speedtest-1.1.0">${text}</Definition>
+  <Definition player="verona-player-speedtest-${playerVersion}">${text}</Definition>
 </Unit>`;
 
     const bookletTemplate = (unitCount) =>
@@ -84,8 +95,9 @@ Fliegen alle nach.
 </Booklet>`
 
     document.addEventListener("DOMContentLoaded", () => {
+      document.querySelector('#player_version').value = playerVersion;
       document.querySelector('#ok').addEventListener('click', async () => {
-
+        playerVersion = document.querySelector('#player_version').value;
         const units = document.querySelector('textarea').value.split(/\n/)
           .filter(text => text.trim())
           .map(unitTemplate)
@@ -94,7 +106,7 @@ Fliegen alle nach.
         const blob = await downloadZip([...units, booklet]).blob();
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "test.zip";
+        link.download = "speedtest-units.zip";
         link.click();
         link.remove();
       });
