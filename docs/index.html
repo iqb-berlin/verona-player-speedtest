@@ -3,8 +3,11 @@
 <head>
   <script src="https://cdn.jsdelivr.net/npm/client-zip/worker.js"></script>
   <meta charset="UTF-8">
-  <title>Speed Test PLayer Unit Producer</title>
+  <title>Speed Test Unit Generator</title>
   <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+    }
     textarea {
       width: 100%;
       min-height: 450px;
@@ -12,9 +15,10 @@
   </style>
 </head>
 <body>
-  <h1>Create Sample Data</h1>
-  <p>This is a small tool to create a sample booklet for the Speedtest-Player. It's not a integral part of the package and may be outdated.</p>
-  <p>The resulting Unit- and Booklet-files are for IQB-Testcenter 12.</p>
+  <h1>Create Unit Data for IQB-Testcenter</h1>
+  <p>This is a tool to create units for the Speedtest-Player. Every line in text below will create one separate unit xml file.</p>
+  <p>Furthermore, one booklet file will be created. All units will be listed in one testlet. This testlet will have a time limit for responding.</p>
+  <p>All files will be put into one zip file to download when you click the button. Add the player html (see [last release](https://github.com/iqb-berlin/verona-player-speedtest/releases/latest)) and a testtaker xml and you are ready to run the test.</p>
   Each line will be a unit:
   <label>
     <textarea style="width: 100%">
@@ -29,8 +33,8 @@ Watscheln durch den Grund
 Gründeln in den Tümpeln
 Werden kugelrund.
 Alle meine Hühnchen
-Schnarren in dem Stroh
-Schnarren in dem Stroh
+Scharren in dem Stroh
+Scharren in dem Stroh
 Finden sie ein Körnchen
 Sind sie alle froh.
 Alle meine Täubchen
@@ -44,19 +48,19 @@ Fliegen alle nach.
   <script>
     const unitTemplate = (text, id) =>
 `<?xml version="1.0"?>
-<Unit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/iqb-berlin/testcenter-backend/12.0.0/definitions/vo_Unit.xsd">
+<Unit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/iqb-berlin/testcenter/13.0.0/definitions/vo_Unit.xsd">
   <Metadata>
     <Id>unit-${id}</Id>
     <Label>unit-${id}</Label>
     <Description>unit-${id}</Description>
   </Metadata>
 
-  <Definition player="verona-player-speedtest-1.0.2">${text}</Definition>
+  <Definition player="verona-player-speedtest-1.1.0">${text}</Definition>
 </Unit>`;
 
     const bookletTemplate = (unitCount) =>
 `<?xml version="1.0" encoding="utf-8"?>
-<Booklet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/iqb-berlin/testcenter-backend/12.0.0/definitions/vo_Booklet.xsd">
+<Booklet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/iqb-berlin/testcenter/13.0.0/definitions/vo_Booklet.xsd">
   <Metadata>
     <Id>speedtest_booklet</Id>
     <Label>Speedtest Booklet</Label>
