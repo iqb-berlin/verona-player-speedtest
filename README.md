@@ -12,12 +12,22 @@ Every release contains of a html file. In order to use it, you need to upload it
 # Unit data
 Because the unit definition is only a short text or sentence, you do not need a sophisticated editor to specify the unit for the player. Depending on your workflow it might be sufficient to use a text file editor. In the context of a [IQB-Studio](https://github.com/iqb-berlin/studio-lite), you can use the [IQB Verona Editor Plain Text](https://github.com/iqb-berlin/verona-editor-plaintext).
 
+We provide a [unit generator](https://iqb-berlin.github.io/verona-player-speedtest/): Put in one sentence per line and get unit xml files for the IQB-Testcenter. 
+
 # For developers
 Changing the player means editing the html file with embedded styles and javascript. So there is no build needed and therefor there are no dependencies.
 
-But we added some tests. In order to run these tests, we provide a node based environment: A package.json states dev dependencies, and after running npm install you can start the test scripts
+But we added some tests. In order to run these tests, we provide a node based environment: A package.json states dev dependencies, and after running npm install you can start the test scripts:
 
 ```
 npm install
 npm run test
 ```
+
+After any change is made, please update the version of the player. There are a number of places:
+
+* package.json
+* player html: metadata
+* docs/index.html default value of the form
+
+Every release should carry the player html with the correct file name: `verona-player-speedtest-<version>.html`
