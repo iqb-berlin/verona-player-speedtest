@@ -1,29 +1,25 @@
 {
   "name": "verona-player-speedtest",
-  "version": "1.0.2",
-  "description": "A dependency-free, vanilla-js Verona3-Player which can run HTML-forms as Units. NPM and stuff is only needed for testing purpose.",
-  "dependencies": {},
+  "version": "2.0.0-rc.1",
+  "description": "A dependency-free, vanilla-js Verona-Player which can run simple texts as Units. NPM and stuff is only needed for testing purpose.",
   "devDependencies": {
-    "geckodriver": "^1.20.0",
-    "jasmine": "^3.6.3",
-    "selenium-webdriver": "^4.0.0-alpha.7",
-    "iqb-dev-components": "1.3.9",
-    "@iqb/eslint-config": "1.0.2"
+    "geckodriver": "^3.2.0",
+    "jasmine": "^4.5.0",
+    "selenium-webdriver": "^4.6.1",
+    "iqb-dev-components": "^1.4.1"
   },
   "scripts": {
-    "test": "clear && npx jasmine --config=test/jasmine.json"
+    "test": "clear && npx jasmine --config=test/jasmine.json",
+    "test-windows": "npx jasmine --config=test/jasmine.json"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iqb-berlin/verona-player-html.git"
+    "url": "git+https://github.com/iqb-berlin/verona-player-speedtest"
   },
-  "eslintConfig": {
-    "extends": "@iqb/eslint-config/javascript"
-  },
-  "author": "Philipp Franck",
+  "author": "Philipp Franck, IQB",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/iqb-berlin/verona-player-html/issues"
+    "url": "https://github.com/iqb-berlin/verona-player-speedtest/issues"
   },
-  "homepage": "https://github.com/iqb-berlin/verona-player-html#readme"
+  "homepage": "https://github.com/iqb-berlin/verona-player-speedtest#readme"
 }
