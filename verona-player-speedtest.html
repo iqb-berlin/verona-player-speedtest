@@ -217,6 +217,9 @@
       if (unitState.dataParts?.main) {
         const main = JSON.parse(unitState.dataParts.main);
         document.querySelector(`[value="${main[0].value}"]`).checked = true;
+      } else {
+        document.querySelector(`[value="A"]`).checked = false;
+        document.querySelector(`[value="B"]`).checked = false;
       }
     }
 
