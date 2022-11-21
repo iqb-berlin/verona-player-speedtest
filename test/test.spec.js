@@ -16,7 +16,7 @@ if (testConfig.headless) {
   options.addArguments('-headless');
 }
 
-const playerPath = `${__dirname}/../verona-player-speedtest-1.0.2.html`;
+const playerPath = `${__dirname}/../verona-player-speedtest.html`;
 
 const send = async message => {
   await driver.executeScript(`window.postMessage(${JSON.stringify(message)}, '*');`);
