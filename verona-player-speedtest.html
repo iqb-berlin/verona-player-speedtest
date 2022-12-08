@@ -102,7 +102,7 @@
 <body>
 
 <div>
-  <span id="text">Ein Satz</span>
+  <div id="text">Ein Satz</div>
   <form id="buttons">
     <label>
       <input type="radio" name="main" value="A">
@@ -120,6 +120,18 @@
 <script>
 
   let sessionId = '';
+  let start_timestamp = -1;
+  const parameters = {
+    "variable_id_value": "speedtest",
+    "variable_id_time": "speedtest_time",
+    "disable_on_return": "false",
+    "max_width_px": "0",
+    "button_label_A": "richtig",
+    "button_label_B": "falsch",
+    "button_label_continue": "Weiter zur nächsten Aufgabe",
+    "message_disabled": "Der Wert kann nicht mehr geändert werden.",
+    "message_no_next": "Es kann aktuell nicht weitergeblättert werden."
+  };
 
   const playerMetaData = JSON.parse(document.querySelector('#verona-metadata').innerText)
 
@@ -187,6 +199,7 @@
       }
       if (type === "vopStartCommand") {
         Player.start(data);
+        start_timestamp = Date.now();
         Message.send.vopStateChangedNotification();
       }
     };
@@ -206,11 +219,25 @@
       if (!value) {
         return null;
       }
-      return JSON.stringify([{ id: "speedtest", value }]);
+      return JSON.stringify([
+              {id: parameters.variable_id_value, value },
+        {id: parameters.variable_id_time, value: Date.now() - start_timestamp}
+      ]);
     }
 
     setUnit = text => {
-      document.getElementById('text').innerText = text;
+      const lines = text.split(/\r?\n/);
+      let newText = [];
+      lines.forEach(line => {
+        const parameter_matches = line.match(/^(\w+)::(\w+)$/);
+        if (parameter_matches && parameter_matches.length > 2 && Object.keys(parameters).indexOf(parameter_matches[1]) >= 0) {
+          parameters[parameter_matches[1]] = parameter_matches[2];
+        } else {
+          newText.push(line);
+        }
+      })
+      document.getElementById('text').innerText = newText.join('\r');
+      if (parameters.max_width_px !== '0') document.getElementById('text').style.maxWidth = parameters.max_width_px + 'px';
     }
 
     setUnitData = unitState => {
