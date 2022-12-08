@@ -69,11 +69,11 @@
     }
 
     #buttons {
-        margin-top: 2em;
-    }
-
-    #buttons label:first-of-type {
-        margin-right: 1em;
+      margin-top: 2em;
+      display: flex;
+      flex-direction: row;
+      gap: 1em;
+      justify-content: center;
     }
 
     #buttons .button {
@@ -106,11 +106,11 @@
   <form id="buttons">
     <label>
       <input type="radio" name="main" value="A">
-      <span class="button">richtig</span>
+      <span class="button" id="speed-button-label-A">richtig</span>
     </label>
     <label>
       <input type="radio" name="main" value="B">
-      <span class="button">falsch</span>
+      <span class="button" id="speed-button-label-B">falsch</span>
     </label>
   </form>
 </div>
@@ -128,6 +128,7 @@
     "max_width_px": "0",
     "button_label_A": "richtig",
     "button_label_B": "falsch",
+    "button_label_C": "",
     "button_label_continue": "Weiter zur nächsten Aufgabe",
     "message_disabled": "Der Wert kann nicht mehr geändert werden.",
     "message_no_next": "Es kann aktuell nicht weitergeblättert werden."
@@ -229,15 +230,44 @@
       const lines = text.split(/\r?\n/);
       let newText = [];
       lines.forEach(line => {
-        const parameter_matches = line.match(/^(\w+)::(\w+)$/);
+        const parameter_matches = line.match(/^(\w+)::(.+)$/);
         if (parameter_matches && parameter_matches.length > 2 && Object.keys(parameters).indexOf(parameter_matches[1]) >= 0) {
           parameters[parameter_matches[1]] = parameter_matches[2];
         } else {
           newText.push(line);
         }
       })
-      document.getElementById('text').innerText = newText.join('\r');
-      if (parameters.max_width_px !== '0') document.getElementById('text').style.maxWidth = parameters.max_width_px + 'px';
+      const textElement = document.getElementById('text');
+      textElement.innerText = newText.join('\r');
+      if (parameters.max_width_px === '0') {
+        if (textElement.style.maxWidth) textElement.style.maxWidth = null;
+      } else {
+        textElement.style.maxWidth = parameters.max_width_px + 'px';
+      }
+      document.getElementById('speed-button-label-A').innerText = parameters.button_label_A;
+      document.getElementById('speed-button-label-B').innerText = parameters.button_label_B;
+      const buttonC = document.getElementById('speed_button_C');
+      if (parameters.button_label_C) {
+        if (buttonC) {
+          document.getElementById('speed-button-label-C').innerText = parameters.button_label_C;
+        } else {
+          const newLabelElement = document.createElement("label");
+          newLabelElement.setAttribute('id', 'speed_button_C');
+          const newInputElement = document.createElement("input");
+          newInputElement.setAttribute('type', 'radio');
+          newInputElement.setAttribute('name', 'main');
+          newInputElement.setAttribute('value', 'C');
+          newLabelElement.appendChild(newInputElement);
+          const newContentElement = document.createElement("span");
+          newContentElement.setAttribute('class', 'button');
+          newContentElement.setAttribute('id', 'speed-button-label-C');
+          newContentElement.innerText = parameters.button_label_C;
+          newLabelElement.appendChild(newContentElement);
+          document.getElementById('buttons').appendChild(newLabelElement);
+        }
+      } else if (buttonC) {
+        buttonC.remove();
+      }
     }
 
     setUnitData = unitState => {
