@@ -12,6 +12,8 @@ Every release contains of a html file. In order to use it, you need to upload it
 # Unit data
 Because the unit definition is only a short text or sentence, you do not need a sophisticated editor to specify the unit for the player. Depending on your workflow it might be sufficient to use a text file editor. In the context of a [IQB-Studio](https://github.com/iqb-berlin/studio-lite), you can use the [IQB Verona Editor Plain Text](https://github.com/iqb-berlin/verona-editor-plaintext).
 
+You can set some parameters to adapt layout and/or behavior. See [here](docs/parameters.md) for details.
+
 We provide a [unit generator](https://iqb-berlin.github.io/verona-player-speedtest/): Put in one sentence per line and get unit xml files for the IQB-Testcenter. 
 
 # For developers

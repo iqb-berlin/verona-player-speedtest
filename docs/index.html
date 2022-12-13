@@ -13,6 +13,24 @@
       width: 100%;
       min-height: 450px;
     }
+    .parameters {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .parameters > div {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 4px;
+    }
+    .parameters > div:nth-child(even) {
+      background-color: whitesmoke;
+    }
+    .parameters > div > div {
+      flex: 80px;
+    }
   </style>
 </head>
 <body>
@@ -26,37 +44,61 @@
         <textarea style="width: 95%">
 Alle meine Entchen
 Schwimmen auf dem See
-Schwimmen auf dem See
 Köpfchen in das Wasser
 Schwänzchen in die Höh.
 Alle meine Gänschen
-Watscheln durch den Grund
 Watscheln durch den Grund
 Gründeln in den Tümpeln
 Werden kugelrund.
 Alle meine Hühnchen
 Scharren in dem Stroh
-Scharren in dem Stroh
 Finden sie ein Körnchen
 Sind sie alle froh.
 Alle meine Täubchen
 Gurren auf dem Dach
-Gurren auf dem Dach
 Fliegt eins in die Lüfte
-Fliegen alle nach.
-      </textarea>
+Fliegen alle nach.</textarea>
     </div>
-    <div style="flex: 1; display: flex; flex-direction: column; align-items: stretch;">
+    <div class="parameters">
       <h3>Parameters:</h3>
-      <div style="display: flex; flex-direction: row;">
-        <div style="flex: 50px;">Version of the player</div>
+      <div>
+        <div>Version of the player</div>
         <input id="player_version" type="text">
+      </div>
+      <div>
+        <div>Variable id for value</div>
+        <input id="variable_id_value" type="text">
+      </div>
+      <div>
+        <div>Variable id for time</div>
+        <input id="variable_id_time" type="text">
+      </div>
+      <div>
+        <div>Message if "next" is not possible</div>
+        <input id="message_no_next" type="text">
+      </div>
+      <div>
+        <div>Maximal width in px</div>
+        <input id="max_width_px" type="text">
+      </div>
+      <div>
+        <div>Label for first button</div>
+        <input id="button_label_A" type="text">
+      </div>
+      <div>
+        <div>Label for second button</div>
+        <input id="button_label_B" type="text">
+      </div>
+      <div>
+        <div>Label for third button (empty if not shown)</div>
+        <input id="button_label_C" type="text">
       </div>
     </div>
   </div>
   <button id="ok" style="padding: 10px">Download Data</button>
   <script>
-    let playerVersion = "1.1.0";
+    let prologParameters = [];
+    let playerVersion = '1.2.0';
     const unitTemplate = (text, id) =>
 `<?xml version="1.0"?>
 <Unit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/iqb-berlin/testcenter/13.0.0/definitions/vo_Unit.xsd">
@@ -96,10 +138,34 @@ Fliegen alle nach.
 
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelector('#player_version').value = playerVersion;
+      document.querySelector('#variable_id_value').value = 'speedtest';
+      document.querySelector('#variable_id_time').value = 'speedtest_time';
+      document.querySelector('#max_width_px').value = '0';
+      document.querySelector('#button_label_A').value = 'richtig';
+      document.querySelector('#button_label_B').value = 'falsch';
+      document.querySelector('#button_label_C').value = '';
+      document.querySelector('#message_no_next').value = 'Weiterblättern nicht möglich.';
+
       document.querySelector('#ok').addEventListener('click', async () => {
         playerVersion = document.querySelector('#player_version').value;
+        prologParameters = [];
+        let parameter = document.querySelector('#variable_id_value').value;
+        if (parameter !== 'speedtest') prologParameters.push('variable_id_value::' + parameter);
+        parameter = document.querySelector('#variable_id_time').value;
+        if (parameter !== 'speedtest_time') prologParameters.push('variable_id_time::' + parameter);
+        parameter = document.querySelector('#max_width_px').value;
+        if (parameter !== '0') prologParameters.push('max_width_px::' + parameter);
+        parameter = document.querySelector('#button_label_A').value;
+        if (parameter !== 'richtig') prologParameters.push('button_label_A::' + parameter);
+        parameter = document.querySelector('#button_label_B').value;
+        if (parameter !== 'falsch') prologParameters.push('button_label_B::' + parameter);
+        parameter = document.querySelector('#button_label_C').value;
+        if (parameter) prologParameters.push('button_label_C::' + parameter);
+        parameter = document.querySelector('#message_no_next').value;
+        if (parameter !== 'Weiterblättern nicht möglich.') prologParameters.push('message_no_next::' + parameter);
         const units = document.querySelector('textarea').value.split(/\n/)
           .filter(text => text.trim())
+          .map(text => [...prologParameters, text].join('\n'))
           .map(unitTemplate)
           .map((input, id) => ({ name: `Unit/unit-${id}.xml`, lastModified: new Date(), input }));
         const booklet = { name: 'Booklet/Speedtest.xml', lastModified: new Date(), input: bookletTemplate(units.length) };
