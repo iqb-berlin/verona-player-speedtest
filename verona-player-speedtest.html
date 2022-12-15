@@ -94,6 +94,10 @@
         background-color: #656565;
     }
 
+    #buttons [type="radio"]:disabled ~ .button {
+      color: grey;
+    }
+
     #text {
         font-size: 22pt;
     }
@@ -137,7 +141,8 @@
     "button_label_A": "richtig",
     "button_label_B": "falsch",
     "button_label_C": "",
-    "message_no_next": "Weiterblättern nicht möglich."
+    "message_no_next": "Weiterblättern nicht möglich.",
+    "disable_on_return": "false"
   };
 
   const playerMetaData = JSON.parse(document.querySelector('#verona-metadata').innerText)
@@ -285,9 +290,22 @@
       if (unitState.dataParts?.main) {
         const main = JSON.parse(unitState.dataParts.main);
         document.querySelector(`[value="${main[0].value}"]`).checked = true;
+        if (parameters.disable_on_return === 'true') {
+          document.querySelector(`[value="A"]`).disabled = 'disabled';
+          document.querySelector(`[value="B"]`).disabled = 'disabled';
+          const buttonC = document.querySelector(`[value="C"]`);
+          if (buttonC) buttonC.disabled = 'disabled';
+        }
       } else {
         document.querySelector(`[value="A"]`).checked = false;
         document.querySelector(`[value="B"]`).checked = false;
+        document.querySelector(`[value="A"]`).disabled = false;
+        document.querySelector(`[value="B"]`).disabled = false;
+        const buttonC = document.querySelector(`[value="C"]`);
+        if (buttonC) {
+          buttonC.checked = false;
+          buttonC.disabled = false;
+        }
       }
     }
 

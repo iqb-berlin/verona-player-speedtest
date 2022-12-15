@@ -63,35 +63,47 @@ Fliegen alle nach.</textarea>
       <h3>Parameters:</h3>
       <div>
         <div>Version of the player</div>
-        <input id="player_version" type="text">
+        <input id="player_version" type="text"/>
       </div>
       <div>
         <div>Variable id for value</div>
-        <input id="variable_id_value" type="text">
+        <input id="variable_id_value" type="text"/>
       </div>
       <div>
         <div>Variable id for time</div>
-        <input id="variable_id_time" type="text">
+        <input id="variable_id_time" type="text"/>
       </div>
       <div>
         <div>Message if "next" is not possible</div>
-        <input id="message_no_next" type="text">
+        <input id="message_no_next" type="text"/>
       </div>
       <div>
         <div>Maximal width in px</div>
-        <input id="max_width_px" type="text">
+        <input id="max_width_px" type="text"/>
       </div>
       <div>
         <div>Label for first button</div>
-        <input id="button_label_A" type="text">
+        <input id="button_label_A" type="text"/>
       </div>
       <div>
         <div>Label for second button</div>
-        <input id="button_label_B" type="text">
+        <input id="button_label_B" type="text"/>
       </div>
       <div>
         <div>Label for third button (empty if not shown)</div>
-        <input id="button_label_C" type="text">
+        <input id="button_label_C" type="text"/>
+      </div>
+      <div>
+        <input id="disable_on_return" type="checkbox" value="true"/>
+        <label for="disable_on_return">Disable on return</label>
+      </div>
+      <div style="margin-left: 15px">
+        <div>Label for button to continue if disabled</div>
+        <input id="button_label_continue" type="text"/>
+      </div>
+      <div style="margin-left: 15px">
+        <div>Message for disable status</div>
+        <input id="message_disabled" type="text"/>
       </div>
     </div>
   </div>
@@ -145,6 +157,9 @@ Fliegen alle nach.</textarea>
       document.querySelector('#button_label_B').value = 'falsch';
       document.querySelector('#button_label_C').value = '';
       document.querySelector('#message_no_next').value = 'Weiterblättern nicht möglich.';
+      document.querySelector('#button_label_continue').value = 'Weiter';
+      document.querySelector('#message_disabled').value = '';
+
 
       document.querySelector('#ok').addEventListener('click', async () => {
         playerVersion = document.querySelector('#player_version').value;
@@ -163,6 +178,15 @@ Fliegen alle nach.</textarea>
         if (parameter) prologParameters.push('button_label_C::' + parameter);
         parameter = document.querySelector('#message_no_next').value;
         if (parameter !== 'Weiterblättern nicht möglich.') prologParameters.push('message_no_next::' + parameter);
+        parameter = document.querySelector('#disable_on_return').checked;
+        if (parameter) {
+          prologParameters.push('disable_on_return::' + parameter);
+          parameter = document.querySelector('#button_label_continue').value;
+          if (parameter !== 'Weiter') prologParameters.push('button_label_continue::' + parameter);
+          parameter = document.querySelector('#message_disabled').value;
+          if (parameter) prologParameters.push('message_disabled::' + parameter);
+        }
+
         const units = document.querySelector('textarea').value.split(/\n/)
           .filter(text => text.trim())
           .map(text => [...prologParameters, text].join('\n'))
