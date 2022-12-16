@@ -297,7 +297,6 @@
     }
 
     setUnitData = unitState => {
-      console.info(unitState);
       const buttonC = document.querySelector(`[value="C"]`);
       if (unitState.dataParts?.main) {
         const main = JSON.parse(unitState.dataParts.main);
@@ -312,7 +311,6 @@
     }
 
     setDisabled = disabled => {
-      console.info(`disabled: "${disabled}`);
       const buttonC = document.querySelector(`[value="C"]`);
       const disabledMessage = document.getElementById('disabled-message');
       const buttonContinue = document.getElementById('btn-continue');
@@ -354,16 +352,16 @@
 
   Player.addEventListener('click', 'input', () => {
     Message.send.vopStateChangedNotification();
-    if (!canNext) Player.setDisabled(parameters.disable_on_return);
-    goNext();
+    if (canNext) {
+      goNext();
+    } else {
+      Player.setDisabled(parameters.disable_on_return);
+      document.getElementById('no-next-message').innerText = parameters.message_no_next;
+    }
   });
 
   function goNext() {
-    if (canNext) {
-      Message.send.vopUnitNavigationRequestedNotification('next');
-    } else {
-      document.getElementById('no-next-message').innerText = parameters.message_no_next;
-    }
+    Message.send.vopUnitNavigationRequestedNotification('next');
   }
 </script>
 
