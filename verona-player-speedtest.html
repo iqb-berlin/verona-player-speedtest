@@ -125,6 +125,8 @@
     </label>
   </form>
   <div id="no-next-message"></div>
+  <div id="disabled-message"></div>
+  <button id="btn-continue" style="display: none;">Weiter</button>
 </div>
 
 
@@ -134,7 +136,8 @@
   let sessionId = '';
   let start_timestamp = -1;
   let canNext = true;
-  const parameters = {
+  // every change in defaults must be repeated in docs/index.html (generator)
+  const defaultParameters = {
     "variable_id_value": "speedtest",
     "variable_id_time": "speedtest_time",
     "max_width_px": "0",
@@ -142,8 +145,11 @@
     "button_label_B": "falsch",
     "button_label_C": "",
     "message_no_next": "Weiterblättern nicht möglich.",
-    "disable_on_return": "false"
+    "disable_on_return": "false",
+    "button_label_continue": "Weiter",
+    "message_disabled": ""
   };
+  let parameters;
 
   const playerMetaData = JSON.parse(document.querySelector('#verona-metadata').innerText)
 
@@ -151,7 +157,7 @@
     send = new class {
       vopStateChangedNotification = () => {
         const data = Player.getData();
-        const msg = {
+        this._send({
           type: 'vopStateChangedNotification',
           sessionId: sessionId,
           timeStamp: Date.now(),
@@ -162,15 +168,10 @@
           unitState: {
             unitStateDataType: 'iqb-standard@1.0',
             presentationProgress: 'complete',
-            responseProgress: data ? 'complete' : 'none'
+            responseProgress: data ? 'complete' : 'none',
+            dataParts: data ? {"main": data} : {}
           }
-        }
-        if (data) {
-          msg.unitState.dataParts = {
-            main: Player.getData()
-          };
-        }
-        this._send(msg);
+        });
       };
 
       vopReadyNotification = () => {
@@ -206,15 +207,14 @@
     }
 
     receive = (type, data) => {
-      if (sessionId && (data.sessionId !== sessionId)) {
-        throw new Error("Wrong sessionId " + type);
-      }
       if (type === "vopStartCommand") {
         Player.start(data);
         start_timestamp = Date.now();
         Message.send.vopStateChangedNotification();
+      } else if (sessionId && (data.sessionId !== sessionId)) {
+        throw new Error("Wrong sessionId " + type);
       }
-    };
+    }
   }
 
   const Player = new class {
@@ -225,6 +225,8 @@
       if (playerConfig && playerConfig["enabledNavigationTargets"]) {
         canNext = playerConfig["enabledNavigationTargets"].indexOf("next") >= 0;
       }
+      parameters = {}
+      Object.keys(defaultParameters).forEach(k => parameters[k] = defaultParameters[k]);
       this.setUnit(data["unitDefinition"] || new Error("unitDefinition missing"));
       this.setUnitData(data["unitState"] || {});
     }
@@ -287,25 +289,37 @@
     }
 
     setUnitData = unitState => {
+      console.info(unitState);
+      const buttonC = document.querySelector(`[value="C"]`);
       if (unitState.dataParts?.main) {
         const main = JSON.parse(unitState.dataParts.main);
         document.querySelector(`[value="${main[0].value}"]`).checked = true;
-        if (parameters.disable_on_return === 'true') {
-          document.querySelector(`[value="A"]`).disabled = 'disabled';
-          document.querySelector(`[value="B"]`).disabled = 'disabled';
-          const buttonC = document.querySelector(`[value="C"]`);
-          if (buttonC) buttonC.disabled = 'disabled';
-        }
+        this.setDisabled(parameters.disable_on_return);
       } else {
         document.querySelector(`[value="A"]`).checked = false;
         document.querySelector(`[value="B"]`).checked = false;
+        if (buttonC) buttonC.checked = false;
+        this.setDisabled(false);
+      }
+    }
+
+    setDisabled = disabled => {
+      console.info(`disabled: "${disabled}`);
+      const buttonC = document.querySelector(`[value="C"]`);
+      const disabledMessage = document.getElementById('disabled-message');
+      const buttonContinue = document.getElementById('btn-continue');
+      if (disabled === 'true') {
+        document.querySelector(`[value="A"]`).disabled = 'disabled';
+        document.querySelector(`[value="B"]`).disabled = 'disabled';
+        if (buttonC) buttonC.disabled = 'disabled';
+        disabledMessage.innerText = parameters.message_disabled;
+        buttonContinue.style.display = "block";
+      } else {
         document.querySelector(`[value="A"]`).disabled = false;
         document.querySelector(`[value="B"]`).disabled = false;
-        const buttonC = document.querySelector(`[value="C"]`);
-        if (buttonC) {
-          buttonC.checked = false;
-          buttonC.disabled = false;
-        }
+        if (buttonC) buttonC.disabled = false;
+        disabledMessage.innerText = "";
+        buttonContinue.style.display = "none";
       }
     }
 
