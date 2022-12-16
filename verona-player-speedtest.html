@@ -168,6 +168,17 @@
 
   const Message = new class {
     send = new class {
+      vopStateChangedNotificationOnStart = () => {
+        this._send({
+          type: 'vopStateChangedNotification',
+          sessionId: sessionId,
+          timeStamp: Date.now(),
+          unitState: {
+            presentationProgress: 'complete'
+          }
+        });
+      };
+
       vopStateChangedNotification = () => {
         const data = Player.getData();
         this._send({
@@ -237,6 +248,7 @@
       Object.keys(defaultParameters).forEach(k => parameters[k] = defaultParameters[k]);
       this.setUnit(data["unitDefinition"] || new Error("unitDefinition missing"));
       this.setUnitData(data["unitState"] || {});
+      Message.send.vopStateChangedNotificationOnStart();
     }
 
     getData = () => {
