@@ -148,43 +148,56 @@ Fliegen alle nach.</textarea>
   </Units>
 </Booklet>`
 
+    const defaultParameters = {
+      "variable_id_value": "speedtest",
+      "variable_id_time": "speedtest_time",
+      "max_width_px": "0",
+      "button_label_A": "richtig",
+      "button_label_B": "falsch",
+      "button_label_C": "",
+      "message_no_next": "Weiterblättern nicht möglich.",
+      "disable_on_return": "false",
+      "button_label_continue": "Weiter",
+      "message_disabled": ""
+    };
+
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelector('#player_version').value = playerVersion;
-      document.querySelector('#variable_id_value').value = 'speedtest';
-      document.querySelector('#variable_id_time').value = 'speedtest_time';
-      document.querySelector('#max_width_px').value = '0';
-      document.querySelector('#button_label_A').value = 'richtig';
-      document.querySelector('#button_label_B').value = 'falsch';
-      document.querySelector('#button_label_C').value = '';
-      document.querySelector('#message_no_next').value = 'Weiterblättern nicht möglich.';
-      document.querySelector('#button_label_continue').value = 'Weiter';
-      document.querySelector('#message_disabled').value = '';
+      document.querySelector('#variable_id_value').value = defaultParameters.variable_id_value;
+      document.querySelector('#variable_id_time').value = defaultParameters.variable_id_time;
+      document.querySelector('#max_width_px').value = defaultParameters.max_width_px;
+      document.querySelector('#button_label_A').value = defaultParameters.button_label_A;
+      document.querySelector('#button_label_B').value = defaultParameters.button_label_B;
+      document.querySelector('#button_label_C').value = defaultParameters.button_label_C;
+      document.querySelector('#message_no_next').value = defaultParameters.message_no_next;
+      document.querySelector('#button_label_continue').value = defaultParameters.button_label_continue;
+      document.querySelector('#message_disabled').value = defaultParameters.message_disabled;
 
 
       document.querySelector('#ok').addEventListener('click', async () => {
         playerVersion = document.querySelector('#player_version').value;
         prologParameters = [];
         let parameter = document.querySelector('#variable_id_value').value;
-        if (parameter !== 'speedtest') prologParameters.push('variable_id_value::' + parameter);
+        if (parameter !== defaultParameters.variable_id_value) prologParameters.push('variable_id_value::' + parameter);
         parameter = document.querySelector('#variable_id_time').value;
-        if (parameter !== 'speedtest_time') prologParameters.push('variable_id_time::' + parameter);
+        if (parameter !== defaultParameters.variable_id_time) prologParameters.push('variable_id_time::' + parameter);
         parameter = document.querySelector('#max_width_px').value;
-        if (parameter !== '0') prologParameters.push('max_width_px::' + parameter);
+        if (parameter !== defaultParameters.max_width_px) prologParameters.push('max_width_px::' + parameter);
         parameter = document.querySelector('#button_label_A').value;
-        if (parameter !== 'richtig') prologParameters.push('button_label_A::' + parameter);
+        if (parameter !== defaultParameters.button_label_A) prologParameters.push('button_label_A::' + parameter);
         parameter = document.querySelector('#button_label_B').value;
-        if (parameter !== 'falsch') prologParameters.push('button_label_B::' + parameter);
+        if (parameter !== defaultParameters.button_label_B) prologParameters.push('button_label_B::' + parameter);
         parameter = document.querySelector('#button_label_C').value;
-        if (parameter) prologParameters.push('button_label_C::' + parameter);
+        if (parameter !== defaultParameters.button_label_C) prologParameters.push('button_label_C::' + parameter);
         parameter = document.querySelector('#message_no_next').value;
-        if (parameter !== 'Weiterblättern nicht möglich.') prologParameters.push('message_no_next::' + parameter);
+        if (parameter !== defaultParameters.message_no_next) prologParameters.push('message_no_next::' + parameter);
         parameter = document.querySelector('#disable_on_return').checked;
         if (parameter) {
           prologParameters.push('disable_on_return::' + parameter);
           parameter = document.querySelector('#button_label_continue').value;
-          if (parameter !== 'Weiter') prologParameters.push('button_label_continue::' + parameter);
+          if (parameter !== defaultParameters.button_label_continue) prologParameters.push('button_label_continue::' + parameter);
           parameter = document.querySelector('#message_disabled').value;
-          if (parameter) prologParameters.push('message_disabled::' + parameter);
+          if (parameter !== defaultParameters.message_disabled) prologParameters.push('message_disabled::' + parameter);
         }
 
         const units = document.querySelector('textarea').value.split(/\n/)
