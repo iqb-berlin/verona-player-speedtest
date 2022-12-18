@@ -31,7 +31,7 @@
       "notSupportedFeatures": [
         "log-policy",
         "paging-mode",
-        "variable-data"
+        "navigation-denied"
       ],
       "maintainer": {
         "name": [
@@ -149,7 +149,7 @@
   let sessionId = '';
   let start_timestamp = -1;
   let canNext = true;
-  // every change in defaults must be repeated in docs/index.html (generator)
+  // every change in defaults must be repeated in docs/index.html (generator) and docs/parameters.md
   const defaultParameters = {
     "variable_id_value": "speedtest",
     "variable_id_time": "speedtest_time",
@@ -160,7 +160,7 @@
     "message_no_next": "Weiterblättern nicht möglich.",
     "disable_on_return": "false",
     "button_label_continue": "Weiter",
-    "message_disabled": ""
+    "message_disabled": "Die Antwort kann nicht mehr verändert werden."
   };
   let parameters;
 
@@ -174,7 +174,8 @@
           sessionId: sessionId,
           timeStamp: Date.now(),
           unitState: {
-            presentationProgress: 'complete'
+            presentationProgress: 'complete',
+            responseProgress: start_timestamp > 0 ? 'none' : 'complete'
           }
         });
       };
@@ -227,12 +228,7 @@
     }
 
     receive = (type, data) => {
-      if (type === "vopStartCommand") {
-        Player.start(data);
-        start_timestamp = Date.now();
-      } else if (sessionId && (data.sessionId !== sessionId)) {
-        throw new Error("Wrong sessionId " + type);
-      }
+      if (type === "vopStartCommand") Player.start(data);
     }
   }
 
@@ -254,12 +250,15 @@
     getData = () => {
       const formData = new FormData(document.querySelector("form"))
       const value = formData.get('main');
-      if (!value) {
-        return null;
-      }
-      return JSON.stringify([
-              {id: parameters.variable_id_value, status: 'VALUE_CHANGED', value },
-        {id: parameters.variable_id_time, status: 'VALUE_CHANGED', value: Date.now() - start_timestamp}
+      if (!value) return null;
+      return JSON.stringify([{
+          id: parameters.variable_id_value,
+          status: 'VALUE_CHANGED',
+          value
+        }, {
+          id: parameters.variable_id_time,
+          status: 'VALUE_CHANGED',
+          value: start_timestamp > 0 ? Date.now() - start_timestamp : 0}
       ]);
     }
 
@@ -314,11 +313,13 @@
         const main = JSON.parse(unitState.dataParts.main);
         document.querySelector(`[value="${main[0].value}"]`).checked = true;
         this.setDisabled(parameters.disable_on_return);
+        start_timestamp = 0;
       } else {
         document.querySelector(`[value="A"]`).checked = false;
         document.querySelector(`[value="B"]`).checked = false;
         if (buttonC) buttonC.checked = false;
         this.setDisabled(false);
+        start_timestamp = Date.now();
       }
     }
 
@@ -341,13 +342,19 @@
       }
     }
 
-    addEventListener = (eventName, selector, listener) => {
-      document.querySelector('body').addEventListener(eventName, event => {
-        if (event.target.matches(selector)) {
-          listener(event);
-        }
-      });
+    selectAndGoNext = () => {
+      Message.send.vopStateChangedNotification();
+      if (canNext) {
+        goNext();
+      } else {
+        Player.setDisabled(parameters.disable_on_return);
+        document.getElementById('no-next-message').innerText = parameters.message_no_next;
+      }
     }
+  }
+
+  function goNext() {
+    Message.send.vopUnitNavigationRequestedNotification('next');
   }
 
   window.addEventListener('message', event => {Message.receive(event.data.type, event.data)}, false);
@@ -362,19 +369,11 @@
     Message.send.vopWindowFocusChangedNotification(document.hasFocus());
   });
 
-  Player.addEventListener('click', 'input', () => {
-    Message.send.vopStateChangedNotification();
-    if (canNext) {
-      goNext();
-    } else {
-      Player.setDisabled(parameters.disable_on_return);
-      document.getElementById('no-next-message').innerText = parameters.message_no_next;
+  document.getElementById('buttons').addEventListener('click', event => {
+    if (event.target.matches('input')) {
+      Player.selectAndGoNext();
     }
-  });
-
-  function goNext() {
-    Message.send.vopUnitNavigationRequestedNotification('next');
-  }
+  })
 </script>
 
 </body>
