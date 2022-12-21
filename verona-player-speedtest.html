@@ -138,7 +138,7 @@
   <div id="no-next-message"></div>
   <div id="disabled-message"></div>
   <div class="continue-button-parent">
-    <button id="btn-continue" style="display: none;" onclick="goNext()">Weiter</button>
+    <button id="btn-continue" style="display: none;" onclick="Player.goNext()">Weiter</button>
   </div>
 </div>
 
@@ -345,16 +345,16 @@
     selectAndGoNext = () => {
       Message.send.vopStateChangedNotification();
       if (canNext) {
-        goNext();
+        Player.goNext();
       } else {
         Player.setDisabled(parameters.disable_on_return);
         document.getElementById('no-next-message').innerText = parameters.message_no_next;
       }
     }
-  }
 
-  function goNext() {
-    Message.send.vopUnitNavigationRequestedNotification('next');
+    goNext = () => {
+      Message.send.vopUnitNavigationRequestedNotification('next');
+    }
   }
 
   window.addEventListener('message', event => {Message.receive(event.data.type, event.data)}, false);
