@@ -8,7 +8,7 @@
     {
       "$schema": "https://raw.githubusercontent.com/verona-interfaces/metadata/master/verona-module-metadata.json",
       "id": "verona-player-speedtest",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "specVersion": "5.0",
       "metadataVersion": "2.0",
       "type": "player",
@@ -31,7 +31,7 @@
       "notSupportedFeatures": [
         "log-policy",
         "paging-mode",
-        "variable-data"
+        "navigation-denied"
       ],
       "maintainer": {
         "name": [
@@ -69,11 +69,11 @@
     }
 
     #buttons {
-        margin-top: 2em;
-    }
-
-    #buttons label:first-of-type {
-        margin-right: 1em;
+      margin-top: 2em;
+      display: flex;
+      flex-direction: row;
+      gap: 1em;
+      justify-content: center;
     }
 
     #buttons .button {
@@ -94,25 +94,52 @@
         background-color: #656565;
     }
 
+    #buttons [type="radio"]:disabled ~ .button {
+      color: grey;
+    }
+
     #text {
         font-size: 22pt;
+    }
+
+    #no-next-message {
+      margin-top: 20px;
+      font-size: x-large;
+      padding: 0 10px;
+      background-color: burlywood;
+    }
+
+    .continue-button-parent {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    #btn-continue {
+      padding: 4px 24px;
+      font-size: larger;
     }
   </style>
 </head>
 <body>
 
 <div>
-  <span id="text">Ein Satz</span>
+  <div id="text">Ein Satz</div>
   <form id="buttons">
     <label>
       <input type="radio" name="main" value="A">
-      <span class="button">richtig</span>
+      <span class="button" id="speed-button-label-A">richtig</span>
     </label>
     <label>
       <input type="radio" name="main" value="B">
-      <span class="button">falsch</span>
+      <span class="button" id="speed-button-label-B">falsch</span>
     </label>
   </form>
+  <div id="no-next-message"></div>
+  <div id="disabled-message"></div>
+  <div class="continue-button-parent">
+    <button id="btn-continue" style="display: none;" onclick="Player.goNext()">Weiter</button>
+  </div>
 </div>
 
 
@@ -120,33 +147,52 @@
 <script>
 
   let sessionId = '';
+  let start_timestamp = -1;
+  let canNext = true;
+  // every change in defaults must be repeated in docs/index.html (generator) and docs/parameters.md
+  const defaultParameters = {
+    "variable_id_value": "speedtest",
+    "variable_id_time": "speedtest_time",
+    "max_width_px": "0",
+    "button_label_A": "richtig",
+    "button_label_B": "falsch",
+    "button_label_C": "",
+    "message_no_next": "Weiterblättern nicht möglich.",
+    "disable_on_return": "false",
+    "button_label_continue": "Weiter",
+    "message_disabled": "Die Antwort kann nicht mehr verändert werden."
+  };
+  let parameters;
 
   const playerMetaData = JSON.parse(document.querySelector('#verona-metadata').innerText)
 
   const Message = new class {
     send = new class {
-      vopStateChangedNotification = () => {
-        const data = Player.getData();
-        const msg = {
+      vopStateChangedNotificationOnStart = () => {
+        this._send({
           type: 'vopStateChangedNotification',
           sessionId: sessionId,
           timeStamp: Date.now(),
-          playerState: {
-            state: 'running',
-            validPages: {}
-          },
+          unitState: {
+            presentationProgress: 'complete',
+            responseProgress: start_timestamp > 0 ? 'none' : 'complete'
+          }
+        });
+      };
+
+      vopStateChangedNotification = () => {
+        const data = Player.getData();
+        this._send({
+          type: 'vopStateChangedNotification',
+          sessionId: sessionId,
+          timeStamp: Date.now(),
           unitState: {
             unitStateDataType: 'iqb-standard@1.0',
             presentationProgress: 'complete',
-            responseProgress: data ? 'complete' : 'none'
+            responseProgress: data ? 'complete' : 'none',
+            dataParts: data ? {"main": data} : {}
           }
-        }
-        if (data) {
-          msg.unitState.dataParts = {
-            main: Player.getData()
-          };
-        }
-        this._send(msg);
+        });
       };
 
       vopReadyNotification = () => {
@@ -182,53 +228,132 @@
     }
 
     receive = (type, data) => {
-      if (sessionId && (data.sessionId !== sessionId)) {
-        throw new Error("Wrong sessionId " + type);
-      }
-      if (type === "vopStartCommand") {
-        Player.start(data);
-        Message.send.vopStateChangedNotification();
-      }
-    };
+      if (type === "vopStartCommand") Player.start(data);
+    }
   }
 
   const Player = new class {
 
     start = data => {
       sessionId = data.sessionId || new Error("session ID missing");
+      const playerConfig = data["playerConfig"];
+      if (playerConfig && playerConfig["enabledNavigationTargets"]) {
+        canNext = playerConfig["enabledNavigationTargets"].indexOf("next") >= 0;
+      }
+      parameters = {}
+      Object.keys(defaultParameters).forEach(k => parameters[k] = defaultParameters[k]);
       this.setUnit(data["unitDefinition"] || new Error("unitDefinition missing"));
       this.setUnitData(data["unitState"] || {});
+      Message.send.vopStateChangedNotificationOnStart();
     }
 
     getData = () => {
       const formData = new FormData(document.querySelector("form"))
       const value = formData.get('main');
-      if (!value) {
-        return null;
-      }
-      return JSON.stringify([{ id: "speedtest", value }]);
+      if (!value) return null;
+      return JSON.stringify([{
+          id: parameters.variable_id_value,
+          status: 'VALUE_CHANGED',
+          value
+        }, {
+          id: parameters.variable_id_time,
+          status: 'VALUE_CHANGED',
+          value: start_timestamp > 0 ? Date.now() - start_timestamp : 0}
+      ]);
     }
 
     setUnit = text => {
-      document.getElementById('text').innerText = text;
+      const lines = text.split(/\r?\n/);
+      let newText = [];
+      lines.forEach(line => {
+        const parameter_matches = line.match(/^(\w+)::(.+)$/);
+        if (parameter_matches && parameter_matches.length > 2 && Object.keys(parameters).indexOf(parameter_matches[1]) >= 0) {
+          parameters[parameter_matches[1]] = parameter_matches[2];
+        } else {
+          newText.push(line);
+        }
+      })
+      const textElement = document.getElementById('text');
+      textElement.innerText = newText.join('\r');
+      if (parameters.max_width_px === '0') {
+        if (textElement.style.maxWidth) textElement.style.maxWidth = null;
+      } else {
+        textElement.style.maxWidth = parameters.max_width_px + 'px';
+      }
+      document.getElementById('speed-button-label-A').innerText = parameters.button_label_A;
+      document.getElementById('speed-button-label-B').innerText = parameters.button_label_B;
+      const buttonC = document.getElementById('speed_button_C');
+      if (parameters.button_label_C) {
+        if (buttonC) {
+          document.getElementById('speed-button-label-C').innerText = parameters.button_label_C;
+        } else {
+          const newLabelElement = document.createElement("label");
+          newLabelElement.setAttribute('id', 'speed_button_C');
+          const newInputElement = document.createElement("input");
+          newInputElement.setAttribute('type', 'radio');
+          newInputElement.setAttribute('name', 'main');
+          newInputElement.setAttribute('value', 'C');
+          newLabelElement.appendChild(newInputElement);
+          const newContentElement = document.createElement("span");
+          newContentElement.setAttribute('class', 'button');
+          newContentElement.setAttribute('id', 'speed-button-label-C');
+          newContentElement.innerText = parameters.button_label_C;
+          newLabelElement.appendChild(newContentElement);
+          document.getElementById('buttons').appendChild(newLabelElement);
+        }
+      } else if (buttonC) {
+        buttonC.remove();
+      }
+      document.getElementById('no-next-message').innerText = '';
     }
 
     setUnitData = unitState => {
+      const buttonC = document.querySelector(`[value="C"]`);
       if (unitState.dataParts?.main) {
         const main = JSON.parse(unitState.dataParts.main);
         document.querySelector(`[value="${main[0].value}"]`).checked = true;
+        this.setDisabled(parameters.disable_on_return);
+        start_timestamp = 0;
       } else {
         document.querySelector(`[value="A"]`).checked = false;
         document.querySelector(`[value="B"]`).checked = false;
+        if (buttonC) buttonC.checked = false;
+        this.setDisabled(false);
+        start_timestamp = Date.now();
       }
     }
 
-    addEventListener = (eventName, selector, listener) => {
-      document.querySelector('body').addEventListener(eventName, event => {
-        if (event.target.matches(selector)) {
-          listener(event);
-        }
-      });
+    setDisabled = disabled => {
+      const buttonC = document.querySelector(`[value="C"]`);
+      const disabledMessage = document.getElementById('disabled-message');
+      const buttonContinue = document.getElementById('btn-continue');
+      if (disabled === 'true') {
+        document.querySelector(`[value="A"]`).disabled = 'disabled';
+        document.querySelector(`[value="B"]`).disabled = 'disabled';
+        if (buttonC) buttonC.disabled = 'disabled';
+        disabledMessage.innerText = parameters.message_disabled;
+        buttonContinue.style.display = canNext ? "block" : "none";
+      } else {
+        document.querySelector(`[value="A"]`).disabled = false;
+        document.querySelector(`[value="B"]`).disabled = false;
+        if (buttonC) buttonC.disabled = false;
+        disabledMessage.innerText = "";
+        buttonContinue.style.display = "none";
+      }
+    }
+
+    selectAndGoNext = () => {
+      Message.send.vopStateChangedNotification();
+      if (canNext) {
+        Player.goNext();
+      } else {
+        Player.setDisabled(parameters.disable_on_return);
+        document.getElementById('no-next-message').innerText = parameters.message_no_next;
+      }
+    }
+
+    goNext = () => {
+      Message.send.vopUnitNavigationRequestedNotification('next');
     }
   }
 
@@ -244,10 +369,11 @@
     Message.send.vopWindowFocusChangedNotification(document.hasFocus());
   });
 
-  Player.addEventListener('click', 'input', () => {
-    Message.send.vopStateChangedNotification();
-    Message.send.vopUnitNavigationRequestedNotification('next');
-  });
+  document.getElementById('buttons').addEventListener('click', event => {
+    if (event.target.matches('input')) {
+      Player.selectAndGoNext();
+    }
+  })
 </script>
 
 </body>

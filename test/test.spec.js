@@ -102,19 +102,22 @@ describe('speedtest player', () => {
 
     const message1 = await MessageRecorder.getLastMessage(driver, 'vopStateChangedNotification');
     delete message1.timeStamp;
+    let mainData = message1?.unitState?.dataParts?.main;
+    expect(mainData).toBeDefined();
+    const mainDataParsed = JSON.parse(mainData);
+    const mainDataSpeedTime = mainDataParsed.find(varData => varData.id === 'speedtest_time');
+    expect(mainDataSpeedTime).toBeDefined();
+    mainDataSpeedTime.value = 0;
+    message1.unitState.dataParts.main = JSON.stringify(mainDataParsed);
     expect(message1).toEqual({
       type: 'vopStateChangedNotification',
       sessionId: '1',
-      playerState: {
-        state: 'running',
-        validPages: {}
-      },
       unitState: {
         presentationProgress: 'complete',
         responseProgress: 'complete',
         unitStateDataType: 'iqb-standard@1.0',
         dataParts: {
-          main: '[{"id":"speedtest","value":"A"}]'
+          main: '[{"id":"speedtest","status":"VALUE_CHANGED","value":"A"},{"id":"speedtest_time","status":"VALUE_CHANGED","value":0}]'
         }
       }
     });
@@ -124,36 +127,6 @@ describe('speedtest player', () => {
       type: 'vopUnitNavigationRequestedNotification',
       sessionId: '1',
       target: 'next'
-    });
-  });
-
-  it('should send the correct state after loading', async () => {
-
-    await MessageRecorder.recordMessages(driver);
-
-    await send({
-      type: 'vopStartCommand',
-      unitDefinition: 'Dies ist ein Beispielsatz!',
-      sessionId: '1',
-      unitState: {
-      }
-    });
-
-
-    const message1 = await MessageRecorder.getLastMessage(driver, 'vopStateChangedNotification');
-    delete message1.timeStamp;
-    expect(message1).toEqual({
-      type: 'vopStateChangedNotification',
-      sessionId: '1',
-      playerState: {
-        state: 'running',
-        validPages: {}
-      },
-      unitState: {
-        presentationProgress: 'complete',
-        responseProgress: 'none',
-        unitStateDataType: 'iqb-standard@1.0'
-      }
     });
   });
 });
